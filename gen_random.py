@@ -49,8 +49,6 @@ def random_city(graph, nb_city):
 
 
 
-
-
 def cities_complet(graph, cities):
     graph_cities = np.zeros((len(cities),len(cities)))
     graph_dji = convert_graph(graph)
