@@ -63,7 +63,8 @@ def cities_complet(graph, cities):
         for col in liaisons:
             shortest_path = find_path(graph_dji,cities[index],cities[col])
             graph_cities[index][col] = shortest_path.total_cost
-            
+    for i in range(len(cities)):
+        graph_cities[i][i] = 0
     return graph_cities
 
 
