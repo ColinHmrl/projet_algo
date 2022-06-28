@@ -27,7 +27,7 @@ def aproximation_algorithm(matrix_coordonate, random_cities, n, matrix_city_comp
     # Pick an arbitrary tour, in this case (0,1,2,...,n-1)
     tour = list(G.nodes)
     tour_edges = [ (tour[i-1],tour[i]) for i in range(n) ]
-    nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
+    #nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
 
     import matplotlib.pyplot as plt
 
@@ -54,18 +54,16 @@ def aproximation_algorithm(matrix_coordonate, random_cities, n, matrix_city_comp
                     
                     # draw the new tour
                     tour_edges = [ (tour[i-1],tour[i]) for i in range(n) ]
-                    plt.figure() # call this to create a new figure, instead of drawing over the previous one(s)
-                    plt.grid(True)
-                    nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
+                    #plt.figure() # call this to create a new figure, instead of drawing over the previous one(s)
+                    #plt.grid(True)
+                    #nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
 
 
-    print("Final tour:",tour)
     tour_edges = [ (tour[i-1],tour[i]) for i in range(n) ]
-    nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
+    #nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
 
     total_circuit_l = 0
     for i in range(len(tour)):
         total_circuit_l += G.edges[tour_edges[i][0],tour_edges[i][1]]['length']
-    print(total_circuit_l)
 
     return tour_edges, total_circuit_l
