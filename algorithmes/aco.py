@@ -86,28 +86,30 @@ def path_distance_constraint(path,matrice,constraint):
     Returns:
         float: distance du chemin
     """
+    if constraint["enabled"]:
+        idx_constraint_city = path.index(constraint['start'])
+        path = path[idx_constraint_city:] + path[0:idx_constraint_city] + [constraint['start']]
 
-    idx_constraint_city = path.index(constraint['start'])
-    path = path[idx_constraint_city:] + path[0:idx_constraint_city] + [constraint['start']]
+        constraint_path = path[0:path.index(constraint['city'])+1]
 
-    constraint_path = path[0:path.index(constraint['city'])+1]
+        distance = 0
+        for i in range(len(constraint_path)-1):
+            distance += matrice[constraint_path[i]][constraint_path[i+1]]
 
-    distance = 0
-    for i in range(len(constraint_path)-1):
-        distance += matrice[constraint_path[i]][constraint_path[i+1]]
+        official_path =    path_distance(path,matrice)
 
-    official_path =    path_distance(path,matrice)
+        if  distance <= constraint['superior_dist']:
+            
+            if distance >= constraint['inferior_dist']:
+                return official_path
 
-    if  distance <= constraint['superior_dist']:
-        
-        if distance >= constraint['inferior_dist']:
-            return official_path
-
+            else:
+                return official_path+distance
         else:
-            return official_path+distance
+            return official_path*2
+            
     else:
-        return official_path*2
-    
+        return path_distance(path,matrice)    
 
 
 
