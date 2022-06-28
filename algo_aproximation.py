@@ -20,7 +20,7 @@ def aproximation_algorithm(matrix_coordonate, random_cities, n, matrix_city_comp
     for i,j in G.edges:
         (x1,y1) = my_pos[i]
         (x2,y2) = my_pos[j]
-        G.edges[i,j]['length'] = matrix_city_completed[i][j]
+        G.edges[i,j]['length'] = eucl_dist(x1,y1,x2,y2)
     # find minimum spanning tree
     T = nx.minimum_spanning_tree(G,weight='length')
 
