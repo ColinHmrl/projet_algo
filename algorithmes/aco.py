@@ -1,3 +1,5 @@
+#imports
+
 import numpy as np
 import random
 import time
@@ -66,11 +68,48 @@ def path_distance(path,matrice):
     Returns:
         float: distance du chemin
     """
+    
 
     distance = 0
     for i in range(len(path)-1):
         distance += matrice[path[i]][path[i+1]]
+
     return distance
+
+def path_distance_constraint(path,matrice,constraint):
+    """Calcule la distance d'un chemin.
+
+    Args:
+        path (list): path
+        matrice (numpy.array): matrice des poids
+
+    Returns:
+        float: distance du chemin
+    """
+
+    idx_constraint_city = path.index(constraint['start'])
+    path = path[idx_constraint_city:] + path[0:idx_constraint_city] + [constraint['start']]
+
+    constraint_path = path[0:path.index(constraint['city'])+1]
+
+    distance = 0
+    for i in range(len(constraint_path)-1):
+        distance += matrice[constraint_path[i]][constraint_path[i+1]]
+
+    official_path =    path_distance(path,matrice)
+
+    if  distance <= constraint['superior_dist']:
+        
+        if distance >= constraint['inferior_dist']:
+            return official_path
+
+        else:
+            return official_path+distance
+    else:
+        return official_path*2
+    
+
+
 
 def calcul_path_pheromone(pheromone,size,start):
     """créé un chemin à partir d'un résultat de l'algorithme ACO
@@ -104,10 +143,12 @@ def path_edge_selection(pheromone,matrice,start,alpha,beta):
     path = [start]
     nodes = range(len(pheromone))
 
+
+
     for rep in range(len(pheromone)-1):
         nodes_availables = [node for node in nodes if( (node not in path))]
         
-        weigths_node = [pheromone[path[-1]][y] ** alpha * (1/matrice[path[-1]][y]) ** beta for y in nodes_availables]
+        weigths_node = [(pheromone[path[-1]][y]) ** alpha * (1/matrice[path[-1]][y]) ** beta  for y in nodes_availables] 
         probas_nodes = [weigths_node[y]/sum(weigths_node) for y in range(len(weigths_node))]
         
         path.append(random.choices(nodes_availables, weights=probas_nodes, k=1)[0])
@@ -116,24 +157,31 @@ def path_edge_selection(pheromone,matrice,start,alpha,beta):
 
     return path
 
-def delta_T_xy_ant(paths_ant_matrice_wheight,x,y): 
-    if paths_ant_matrice_wheight[x][y] == 0:
-        return 0
+def delta_T_xy_ant(paths_ant_matrice_wheight,x,y,path,matrice,constraint): 
+
+
+    
+
+    if ((paths_ant_matrice_wheight[x][y] != 0)): # and path from index x  where dist_inf < n < dist_sup
+        return 1/(paths_ant_matrice_wheight[x][y])
     else:
-        return 1/paths_ant_matrice_wheight[x][y]
+        return 0
 
 def get_best_path(paths_ants,paths_ants_value):
-    best_path =  paths_ants[np.argmax(paths_ants_value)]
+    best_path =  paths_ants[np.argmin(paths_ants_value)]
     best_path_value = np.max(paths_ants_value)
     return best_path,best_path_value
 
 
-def aco_algorithm(matrice, parameters,result):
+def aco_algorithm(matrice,parameters,result,constraint):
+    start_process_time = time.time()
 
+    pheromone_matrice = random_matrice_pondere(len(matrice),1)
+    #print(len(matrice))
+    #print(len(pheromone_matrice))
 
-    pheromone_matrice = random_matrice_pondere(len(matrice),0)
     best_path = path_edge_selection(pheromone_matrice,matrice,0,parameters["a"],parameters["b"])
-    best_score = path_distance(best_path,matrice)
+    best_score = path_distance_constraint(best_path,matrice,constraint)
 
     time_record = []
 
@@ -146,13 +194,13 @@ def aco_algorithm(matrice, parameters,result):
 
         ants_start = np.random.randint(0,len(matrice),parameters["nbr_ant"])
         paths_ants = [path_edge_selection(pheromone_matrice,matrice,start,parameters["a"],parameters["b"]) for start in ants_start]
-        
+         
         time_paths_ants = time.time()-start
         
         #calcule des poids des path des fourmis
         start = time.time()
 
-        paths_ants_value = [path_distance(path,matrice) for path in paths_ants]
+        paths_ants_value = [path_distance_constraint(path,matrice,constraint) for path in paths_ants]
 
         time_paths_ants_value = time.time()-start
 
@@ -168,14 +216,25 @@ def aco_algorithm(matrice, parameters,result):
         for i in range(len(matrice)):
             for j in range(len(matrice)):
 
-                pheromone_matrice[i][j] = (1 - parameters["p"]) * pheromone_matrice[i][j] + sum(delta_T_xy_ant(paths_ant_matrice_wheight,i,j) for paths_ant_matrice_wheight in paths_ants_matrice_wheight)
+                pheromone_matrice[i][j] = (1 - parameters["p"]) * pheromone_matrice[i][j] + sum(delta_T_xy_ant(paths_ants_matrice_wheight[index],i,j,paths_ants[index],matrice,constraint) for index in range(len(paths_ants_matrice_wheight)))
 
         time_pheromone_matrice = time.time()-start
 
-        #print("iteration : ",x,"/",nbr_iter,"\n","time_paths_ants : ",time_paths_ants,"\n","time_paths_ants_value : ",time_paths_ants_value,"\n","time_paths_ants_matrice_wheight : ",time_paths_ants_matrice_wheight,"\n","time_pheromone_matrice : ",time_pheromone_matrice)
+        try_best_path,try_best_score = get_best_path(paths_ants,paths_ants_value)
+        if try_best_score < best_score:
+            best_path = try_best_path
+            best_score = try_best_score
 
-        best_path,best_score = get_best_path(paths_ants,paths_ants_value)
+
+        
         time_record.append([time_paths_ants,time_paths_ants_value,time_paths_ants_matrice_wheight,time_pheromone_matrice])
+
+        print("iteration : ",x,"/",parameters["nb_iter_max"]," score : ",best_score)
+        print("path : ",best_path)
+        #print("pheromones : ",pheromone_matrice)
+        if time.time() - start_process_time > parameters["time_max"]:
+            #print("time max reached",str(time.time() - start_process_time))
+            break
 
     result.append((pheromone_matrice,best_path,best_score,time_record))
 
@@ -183,5 +242,19 @@ def aco_algorithm(matrice, parameters,result):
 ###
 #
 #
+#parameters = {
+#    "nbr_ant":np.arange(10,200,10), 100
+#    "a":np.arange(0,4.25,.25), 1
+#    "b":np.arange(1,4.25,.25), 1
+#    "p":np.arange(0,1.05,.05), 0.1
+#    "nb_iter_max":[200], 200
+#    "time_max":[120],
+#}
+
+#resul_list = []
+
+# aco.aco_algorithm(matrice,parameters,aco_result_list)
+
+ #result_list[0]
 
 
