@@ -1,4 +1,3 @@
-#import libraries
 import pulp
 import pandas as pd
 from scipy.spatial import distance_matrix
@@ -36,11 +35,12 @@ def get_plan(r0):
         route.append(plan)
     return(route)
 
-def prog_lineaire(graph_complet_cities):
+def prog_lineaire(graph_complet_cities, random_cities):
     """_summary_
 
     Args:
-        graphe : graphe complet de liste
+        graphe : graphe complet de liste   
+        random_cities : liste de villes séléctionnées
 
     Returns:
         route_plan: liste de la route
@@ -87,5 +87,9 @@ def prog_lineaire(graph_complet_cities):
         
         subtour.append(len(route_plan))
 
+    for i in range(len(route_plan[0])):
+        temp_list = list(route_plan[0][i])
+        temp_list[0], temp_list[1] = random_cities[route_plan[0][i][0]], random_cities[route_plan[0][i][1]]
+        route_plan[0][i] = tuple(temp_list)
 
-        return route_plan,subtour,time.time()-start_t_1,pulp.LpStatus[status],pulp.value(model.objective)
+    return route_plan,subtour,time.time()-start_t_1,pulp.LpStatus[status],pulp.value(model.objective)
