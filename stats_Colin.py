@@ -4,6 +4,12 @@ import statistics
 import numpy as np
 
 def histogramme(bornes, pins):
+    """La répartition en pourcentage par rapport a la borne inferieur
+
+    Args:
+        bornes (_type_): _description_
+        pins (_type_): _description_
+    """
     plt.hist(bornes, bins=pins, edgecolor = "black")                         
     plt.xlabel("distance à la borne (pourcentage)")               
     plt.ylabel("nombre d'intances")                               
@@ -11,6 +17,7 @@ def histogramme(bornes, pins):
 
     
 def courbe(iterations_max, sol_courante, sol_best):
+    """meilleure optimum local et meilleur all time"""
     plt.plot(range(iterations_max), sol_courante)
     plt.plot(range(iterations_max), sol_best)
     plt.xlabel("nb itérations", fontsize=16)
@@ -18,6 +25,7 @@ def courbe(iterations_max, sol_courante, sol_best):
 
 
 def courbe_stats(bornes, debut, fin, pas):
+    """"""
     moyennes = []
     deviations = []
     moyennes.append(statistics.fmean(bornes))               
