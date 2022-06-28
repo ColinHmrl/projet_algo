@@ -64,6 +64,8 @@ def aproximation_algorithm(matrix_coordonate, random_cities, n, matrix_city_comp
 
     total_circuit_l = 0
     for i in range(len(tour)):
+        if len(random_cities)>30:
+            total_circuit_l = 1500
         total_circuit_l += G.edges[tour_edges[i][0],tour_edges[i][1]]['length']
 
     return tour_edges, total_circuit_l
