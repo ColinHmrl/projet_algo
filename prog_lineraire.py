@@ -84,4 +84,4 @@ def prog_lineaire(graph_complet_cities, random_cities):
 
 
 def get_borne_inf(graph_complet_cities, random_cities):
-    print(prog_lineaire(graph_complet_cities, random_cities)[-1])
+    return prog_lineaire(graph_complet_cities, random_cities)[-1]
