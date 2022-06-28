@@ -15,32 +15,57 @@ def aproximation_algorithm(matrix_coordonate, random_cities, n, matrix_city_comp
 
     import math
     def eucl_dist(x1,y1,x2,y2):
-        return math.sqrt( (x1-x2)**2 + (y1-y2)**2 )
+        return ((x1-x2)**2 + (y1-y2)**2)**0.5
 
     for i,j in G.edges:
         (x1,y1) = my_pos[i]
         (x2,y2) = my_pos[j]
-        G.edges[i,j]['length'] = eucl_dist(x1,y1,x2,y2)
+        G.edges[i,j]['length'] = matrix_city_completed[random_cities.index(i)][random_cities.index(j)]
     # find minimum spanning tree
     T = nx.minimum_spanning_tree(G,weight='length')
 
-    # double (or bi-direct) the minimum spanning tree
-    D = nx.DiGraph(T)
-    # find an Eulerian cycle of the doubled spanning tree
-    initial_tour = list( nx.eulerian_circuit(D,source=random_cities[0]))
-    print(initial_tour)
-    # take shortcuts (avoid repeated nodes)
-    tour = [ random_cities[0] ]
-    for (i,j) in initial_tour:
-        if j not in tour:
-            tour.append(j)
-    total_circuit_l = 0
-    for i in range(len(tour)):
-        total_circuit_l += G.edges[initial_tour[i][0],initial_tour[i][1]]['length']
-    print(total_circuit_l)
-
-    # draw the tour
+    # Pick an arbitrary tour, in this case (0,1,2,...,n-1)
+    tour = list(G.nodes)
     tour_edges = [ (tour[i-1],tour[i]) for i in range(n) ]
     nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
 
-    return initial_tour, total_circuit_l
+    import matplotlib.pyplot as plt
+
+    improved = True
+    while improved:
+        improved = False
+        for i in range(n):
+            for j in range(i+1,n):
+                
+                # two current edges from tour
+                cur1 = (tour[i],tour[i+1])
+                cur2 = (tour[j],tour[(j+1)%n])
+                cur_length = G.edges[cur1]['length'] + G.edges[cur2]['length']
+                
+                # two 'new' edges for the tour
+                new1 = (tour[i],tour[j])
+                new2 = (tour[i+1],tour[(j+1)%n])
+                new_length = G.edges[new1]['length'] + G.edges[new2]['length']
+                
+                # update the tour, if improved
+                if new_length < cur_length:
+                    tour[i+1:j+1] = tour[i+1:j+1][::-1]
+                    improved = True
+                    
+                    # draw the new tour
+                    tour_edges = [ (tour[i-1],tour[i]) for i in range(n) ]
+                    plt.figure() # call this to create a new figure, instead of drawing over the previous one(s)
+                    plt.grid(True)
+                    nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
+
+
+    print("Final tour:",tour)
+    tour_edges = [ (tour[i-1],tour[i]) for i in range(n) ]
+    nx.draw(G.edge_subgraph(tour_edges), pos=my_pos)
+
+    total_circuit_l = 0
+    for i in range(len(tour)):
+        total_circuit_l += G.edges[tour_edges[i][0],tour_edges[i][1]]['length']
+    print(total_circuit_l)
+
+    return tour_edges, total_circuit_l
