@@ -80,9 +80,10 @@ def prog_lineaire(graph_complet_cities, random_cities):
         temp_list[0], temp_list[1] = random_cities[route_plan[0][i][0]], random_cities[route_plan[0][i][1]]
         route_plan[0][i] = tuple(temp_list)
 
-    if len(random_cities)>30:
-            val_fin = pulp.value(model.objective) + 1500
+    val_fin = pulp.value(model.objective)
 
+    if len(random_cities)>30:
+            val_fin +=  1500
     return route_plan,subtour,time.time()-start_t_1,pulp.LpStatus[status],val_fin
 
 

@@ -186,6 +186,8 @@ def aco_algorithm(matrice,parameters,result,constraint):
     best_score = path_distance_constraint(best_path,matrice,constraint)
 
     time_record = []
+    min_local = []
+    best_min_local = []
 
 
 
@@ -223,6 +225,8 @@ def aco_algorithm(matrice,parameters,result,constraint):
         time_pheromone_matrice = time.time()-start
 
         try_best_path,try_best_score = get_best_path(paths_ants,paths_ants_value)
+        min_local.append(try_best_score)
+        best_min_local.append(best_score)
         if try_best_score < best_score:
             best_path = try_best_path
             best_score = try_best_score
@@ -238,7 +242,7 @@ def aco_algorithm(matrice,parameters,result,constraint):
             #print("time max reached",str(time.time() - start_process_time))
             break
 
-    result.append((pheromone_matrice,best_path,best_score,time_record))
+    result.append((pheromone_matrice,best_path,best_score,time_record,min_local,best_min_local))
 
 
 ###
