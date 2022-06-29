@@ -24,15 +24,12 @@ def courbe(iterations_max, sol_courante, sol_best):
     plt.ylabel("valeur", fontsize=16)
 
 
-def courbe_stats(bornes, debut, fin, pas):
+def courbe_stats(moyennes, deviations,debut, fin, pas):
     """"""
-    moyennes = []
-    deviations = []
-    moyennes.append(statistics.fmean(bornes))               
-    deviations.append(np.std(bornes))
-    plt.plot(range(debut, fin, pas), moyennes)
+
+    plt.plot(range(debut, fin,pas), moyennes[debut])
     # affichage de la bande d'écart-type
-    plt.fill_between(range((debut, fin, pas),
+    plt.fill_between(range((debut, fin),
                     np.subtract(moyennes, deviations), # borne haute
                     np.add(moyennes, deviations),      # borne basse
                     alpha=.1))                     
